@@ -35,7 +35,7 @@ export const TOOLS = [
       properties: {
         action: {
           type: "string",
-          enum: ["click", "type", "select", "scroll"],
+          enum: ["click", "type", "select", "scroll", "wait", "keyboard", "hover", "upload", "dialog"],
           description: "The action to perform.",
         },
         ref: {
@@ -58,6 +58,39 @@ export const TOOLS = [
           enum: ["up", "down", "left", "right"],
           description:
             'Scroll direction. Only used when action is "scroll". Defaults to "down".',
+        },
+        key: {
+          type: "string",
+          description:
+            'Key to press. Used with "keyboard" action. Examples: "Enter", "Escape", "Tab", "Control+a".',
+        },
+        state: {
+          type: "string",
+          enum: ["visible", "hidden", "attached", "detached"],
+          description:
+            'Wait condition. Used with "wait" action. Defaults to "visible".',
+        },
+        timeout: {
+          type: "number",
+          description:
+            'Timeout in ms for "wait" action. Defaults to 5000, max 30000.',
+        },
+        filePaths: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            'File paths to upload. Used with "upload" action on file input elements.',
+        },
+        dialogAction: {
+          type: "string",
+          enum: ["accept", "dismiss"],
+          description:
+            'How to handle the next dialog. Used with "dialog" action. Defaults to "accept".',
+        },
+        promptText: {
+          type: "string",
+          description:
+            'Text to enter in a prompt dialog. Used with "dialog" action when dialogAction is "accept".',
         },
         sessionId: {
           type: "string",

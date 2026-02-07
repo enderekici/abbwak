@@ -122,6 +122,13 @@ export class McpBrowserServer {
       target,
       value: args.value as string | undefined,
       direction: args.direction as "up" | "down" | "left" | "right" | undefined,
+      selector: args.selector as string | undefined,
+      state: args.state as "visible" | "hidden" | "attached" | "detached" | undefined,
+      timeout: args.timeout as number | undefined,
+      key: args.key as string | undefined,
+      filePaths: args.filePaths as string[] | undefined,
+      dialogAction: args.dialogAction as "accept" | "dismiss" | undefined,
+      promptText: args.promptText as string | undefined,
     });
 
     const text = formatSnapshot(result.snapshot);

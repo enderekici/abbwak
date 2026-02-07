@@ -42,7 +42,7 @@ export const config = {
     "font",
     "media",
   ]),
-  browser: envBrowser("ABBWAK_BROWSER", "chromium"),
+  browser: envBrowser("ABBWAK_BROWSER", "firefox"),
   viewportWidth: envInt("ABBWAK_VIEWPORT_WIDTH", 1280),
   viewportHeight: envInt("ABBWAK_VIEWPORT_HEIGHT", 720),
 } as const;

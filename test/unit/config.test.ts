@@ -107,9 +107,9 @@ describe('config default values (when env vars are not overridden)', () => {
     }
   });
 
-  it('should default browser to chromium', () => {
+  it('should default browser to firefox', () => {
     if (!process.env.ABBWAK_BROWSER) {
-      expect(config.browser).toBe('chromium');
+      expect(config.browser).toBe('firefox');
     }
   });
 

@@ -6,6 +6,11 @@ import { executeType } from "./type.js";
 import { executeSelect } from "./select.js";
 import { executeScroll } from "./scroll.js";
 import { executeNavigate } from "./navigate.js";
+import { executeWait } from "./wait.js";
+import { executeKeyboard } from "./keyboard.js";
+import { executeHover } from "./hover.js";
+import { executeUpload } from "./upload.js";
+import { executeDialogConfig } from "./dialog.js";
 
 export type { ActionTarget, ActionResult } from "./types.js";
 export { executeClick } from "./click.js";
@@ -13,6 +18,12 @@ export { executeType } from "./type.js";
 export { executeSelect } from "./select.js";
 export { executeScroll } from "./scroll.js";
 export { executeNavigate } from "./navigate.js";
+export { executeWait } from "./wait.js";
+export { executeKeyboard } from "./keyboard.js";
+export { executeHover } from "./hover.js";
+export { executeUpload } from "./upload.js";
+export { executeDialogConfig } from "./dialog.js";
+export { installDialogHandler } from "./dialog.js";
 
 type ScrollDirection = "up" | "down" | "left" | "right";
 
@@ -22,6 +33,13 @@ interface ActionParams {
   url?: string;
   direction?: ScrollDirection;
   waitUntil?: "load" | "domcontentloaded" | "networkidle";
+  selector?: string;
+  state?: "visible" | "hidden" | "attached" | "detached";
+  timeout?: number;
+  key?: string;
+  filePaths?: string[];
+  dialogAction?: "accept" | "dismiss";
+  promptText?: string;
 }
 
 function requireTarget(params: ActionParams, actionName: string): ActionTarget {
@@ -89,6 +107,46 @@ export async function executeAction(
         );
       }
       return executeNavigate(session, params.url, params.waitUntil);
+    }
+
+    case "wait": {
+      return executeWait(session, {
+        selector: params.selector,
+        state: params.state,
+        timeout: params.timeout,
+      });
+    }
+
+    case "keyboard": {
+      if (!params.key) {
+        throw new ValidationError(
+          'Action "keyboard" requires a "key" parameter',
+        );
+      }
+      return executeKeyboard(session, params.key);
+    }
+
+    case "hover": {
+      const target = requireTarget(params, "hover");
+      return executeHover(session, target);
+    }
+
+    case "upload": {
+      const target = requireTarget(params, "upload");
+      if (!params.filePaths || params.filePaths.length === 0) {
+        throw new ValidationError(
+          'Action "upload" requires a "filePaths" parameter with at least one path',
+        );
+      }
+      return executeUpload(session, target, params.filePaths);
+    }
+
+    case "dialog": {
+      const dialogAction = params.dialogAction ?? "accept";
+      return executeDialogConfig(session, {
+        action: dialogAction,
+        promptText: params.promptText,
+      });
     }
 
     default:
