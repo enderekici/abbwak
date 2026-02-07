@@ -1,251 +1,660 @@
 # abbwak
 
-**API-Based Browser Without API Key** — A free, open-source headless browser tool designed for AI agents.
+**API-Based Browser Without API Key** — A free, open-source headless browser designed for AI agents.
 
-No API keys. No paid services. Just a powerful, self-hosted browser that agents can control.
+No API keys. No paid services. Just a powerful, self-hosted browser that agents can control via REST API or MCP.
 
 ## Why abbwak?
 
-Existing browser tools for agents (Browserbase, Steel Cloud, Bright Data) charge per session or require API keys. Playwright MCP dumps 26+ tools and full accessibility trees, burning agent context windows. `abbwak` gives you:
+Existing browser tools for agents (Browserbase, Steel Cloud, Bright Data) charge per session or require API keys. Playwright MCP dumps 26+ tools and full accessibility trees, burning agent context windows. abbwak gives you:
 
-- **5 clean primitives** — `navigate`, `act`, `extract`, `observe`, `screenshot`
-- **93% context reduction** — Snapshot+Refs filters accessibility trees to only interactive/meaningful elements
+- **5 clean endpoints** — `navigate`, `act`, `extract`, `observe`, `screenshot`
+- **10 actions** — click, type, select, scroll, wait, keyboard, hover, upload, dialog
+- **93% context reduction** — Snapshot+Refs filters DOM to only interactive/meaningful elements
 - **Two interfaces** — REST API for any language, MCP server for Claude Desktop/Cursor
 - **Zero cost** — runs entirely on your own machine
+- **Low memory** — defaults to Firefox (~120MB idle vs Chromium's ~250MB)
+
+---
 
 ## Quick Start
 
-```bash
-# Install
-npm install
-npx playwright install chromium
+### Option 1: npm
 
-# Run the REST API server
+```bash
+npm install
+npx playwright install firefox
+
+# Start REST API server
 npm run dev
 
-# Or run the MCP server (stdio, for Claude Desktop)
-npx tsx src/mcp/server.ts
+# Or start MCP server (stdio)
+npm run mcp:dev
 ```
 
-## Use with Claude Desktop / Claude Code
+### Option 2: Docker (recommended for production)
 
-Add this to your Claude Desktop MCP config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+```bash
+docker compose up
+# Server running at http://localhost:3000
+```
+
+### Option 3: Global install
+
+```bash
+npm install -g abbwak
+npx playwright install firefox
+
+abbwak              # REST API on http://0.0.0.0:3000
+abbwak --mcp        # MCP server (stdio transport)
+abbwak --help       # Show all options
+```
+
+---
+
+## MCP Setup (Claude Desktop / Claude Code)
+
+### Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
   "mcpServers": {
     "abbwak": {
       "command": "npx",
-      "args": ["tsx", "/path/to/abbwak/src/mcp/server.ts"]
+      "args": ["abbwak", "--mcp"]
     }
   }
 }
 ```
 
-For Claude Code, add to `.claude/settings.json`:
+### Claude Code
+
+Add to `.claude/settings.json`:
 
 ```json
 {
   "mcpServers": {
     "abbwak": {
       "command": "npx",
-      "args": ["tsx", "/path/to/abbwak/src/mcp/server.ts"]
+      "args": ["abbwak", "--mcp"]
     }
   }
 }
 ```
 
-Then Claude can use these 5 tools:
+### MCP Tools
 
 | Tool | Description |
 |------|-------------|
-| `browser_navigate` | Go to a URL, returns page snapshot |
-| `browser_act` | Click, type, select, or scroll using ref IDs |
+| `browser_navigate` | Go to a URL, returns page snapshot with ref IDs |
+| `browser_act` | Perform actions: click, type, select, scroll, wait, keyboard, hover, upload, dialog |
 | `browser_extract` | Get page content as text, markdown, or structured JSON |
 | `browser_observe` | Get accessibility snapshot with interactive element refs |
-| `browser_screenshot` | Capture page as PNG |
+| `browser_screenshot` | Capture page as base64 PNG |
 
-### Example Claude interaction
+All tools accept an optional `sessionId`. If omitted, a default session is auto-created and reused.
+
+### Example Agent Interaction
 
 ```
 User: "Search for the latest Claude API docs"
 
-Claude uses: browser_navigate({ url: "https://google.com" })
-  Returns snapshot with search box as r3
+Agent: browser_navigate({ url: "https://google.com" })
+  → Returns snapshot: r3=textbox "Search", r5=button "Google Search"
 
-Claude uses: browser_act({ action: "type", ref: "r3", value: "Claude API documentation" })
-Claude uses: browser_act({ action: "click", ref: "r5" })  // Search button
-Claude uses: browser_extract({ mode: "markdown" })
-  Returns search results as clean markdown
+Agent: browser_act({ action: "type", ref: "r3", value: "Claude API documentation" })
+Agent: browser_act({ action: "keyboard", key: "Enter" })
+  → Page navigates to search results
+
+Agent: browser_act({ action: "wait", selector: "#search", state: "visible" })
+  → Waits for results to load
+
+Agent: browser_extract({ mode: "markdown" })
+  → Returns search results as clean markdown
 ```
 
-## REST API
+---
 
-Start the server:
+## REST API Reference
 
-```bash
-npm run dev    # Development with hot reload
-npm run build && npm start  # Production
+Base URL: `http://localhost:3000`
+
+### Sessions
+
+#### Create Session
+
+```
+POST /sessions
 ```
 
-### Endpoints
+**Request body** (all fields optional):
 
-#### Sessions
-
-```bash
-# Create a session
-curl -X POST http://localhost:3000/sessions
-# { "id": "abc123", "url": "about:blank", "createdAt": "..." }
-
-# List sessions
-curl http://localhost:3000/sessions
-# { "sessions": [{ "id": "abc123", ... }] }
-
-# Delete a session
-curl -X DELETE http://localhost:3000/sessions/abc123
+```json
+{
+  "profile": "my-profile",
+  "viewport": { "width": 1920, "height": 1080 },
+  "blockResources": ["image", "font", "media"]
+}
 ```
 
-#### Navigate
+**Response** (201):
 
-```bash
-curl -X POST http://localhost:3000/sessions/abc123/navigate \
-  -H 'Content-Type: application/json' \
-  -d '{ "url": "https://example.com" }'
-# { "url": "...", "title": "...", "snapshot": { "refs": [...] } }
+```json
+{
+  "id": "abc123xyz",
+  "url": "about:blank",
+  "createdAt": 1707350400000
+}
 ```
 
-#### Act (click, type, select, scroll)
+#### List Sessions
+
+```
+GET /sessions
+```
+
+**Response:**
+
+```json
+{
+  "sessions": [
+    {
+      "id": "abc123xyz",
+      "url": "https://example.com",
+      "createdAt": 1707350400000,
+      "lastActivity": 1707350450000
+    }
+  ]
+}
+```
+
+#### Delete Session
+
+```
+DELETE /sessions/:id
+```
+
+**Response:**
+
+```json
+{ "success": true }
+```
+
+---
+
+### Navigate
+
+```
+POST /sessions/:id/navigate
+```
+
+**Request body:**
+
+```json
+{
+  "url": "https://example.com",
+  "waitUntil": "domcontentloaded"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `url` | string | Yes | URL to navigate to (must be http/https) |
+| `waitUntil` | string | No | `"load"`, `"domcontentloaded"`, or `"networkidle"` |
+
+**Response:**
+
+```json
+{
+  "url": "https://example.com",
+  "title": "Example Domain",
+  "snapshot": {
+    "url": "https://example.com",
+    "title": "Example Domain",
+    "refs": [
+      { "ref": "r1", "role": "heading", "name": "Example Domain" },
+      { "ref": "r2", "role": "link", "name": "More information..." }
+    ]
+  }
+}
+```
+
+---
+
+### Act (Perform Actions)
+
+```
+POST /sessions/:id/act
+```
+
+**Common fields:**
+
+| Field | Type | Required | Used by |
+|-------|------|----------|---------|
+| `action` | string | Yes | All |
+| `ref` | string | No | click, type, select, hover, upload |
+| `selector` | string | No | click, type, select, hover, upload, wait |
+
+**Action-specific fields:**
+
+| Action | Extra fields | Description |
+|--------|-------------|-------------|
+| `click` | — | Click an element by ref or selector |
+| `type` | `value` (required) | Type text into input/textarea/contenteditable |
+| `select` | `value` (required) | Select dropdown option (native or custom) |
+| `scroll` | `direction` (up/down/left/right) | Scroll page by 500px or element into view |
+| `wait` | `selector`, `state`, `timeout` | Wait for element state or network idle |
+| `keyboard` | `key` (required) | Press a keyboard key or combo |
+| `hover` | — | Hover over element (triggers menus/tooltips) |
+| `upload` | `filePaths` (required) | Upload files to a file input |
+| `dialog` | `dialogAction`, `promptText` | Configure how next dialog is handled |
+
+**Keyboard action — allowed keys:**
+
+- Named: `Enter`, `Escape`, `Tab`, `Backspace`, `Delete`, `Space`
+- Arrows: `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`
+- Navigation: `Home`, `End`, `PageUp`, `PageDown`
+- Function: `F1` through `F12`
+- Modifiers: `Control+a`, `Shift+Tab`, `Alt+F4`, `Meta+c`
+- Any single printable ASCII character
+
+**Wait action — states:**
+
+| State | Meaning |
+|-------|---------|
+| `visible` | Element exists and is visible (default) |
+| `hidden` | Element is hidden or removed |
+| `attached` | Element exists in DOM (may be hidden) |
+| `detached` | Element removed from DOM |
+
+Timeout: default 5000ms, max 30000ms. If no selector given, waits for network idle.
+
+**Dialog action:**
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `dialogAction` | `"accept"` or `"dismiss"` | `"accept"` | How to handle alert/confirm/prompt |
+| `promptText` | string | — | Text to enter in prompt dialogs |
+
+**Examples:**
 
 ```bash
-# Click by ref ID (from a previous observe/navigate response)
-curl -X POST http://localhost:3000/sessions/abc123/act \
+# Click
+curl -X POST http://localhost:3000/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "click", "ref": "r5" }'
 
-# Type into an input
-curl -X POST http://localhost:3000/sessions/abc123/act \
+# Type
+curl -X POST http://localhost:3000/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "type", "ref": "r3", "value": "hello world" }'
 
-# Select a dropdown option
-curl -X POST http://localhost:3000/sessions/abc123/act \
+# Select dropdown
+curl -X POST http://localhost:3000/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "select", "ref": "r7", "value": "option2" }'
 
-# Scroll down
-curl -X POST http://localhost:3000/sessions/abc123/act \
+# Scroll
+curl -X POST http://localhost:3000/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "scroll", "direction": "down" }'
+
+# Wait for element
+curl -X POST http://localhost:3000/sessions/$ID/act \
+  -H 'Content-Type: application/json' \
+  -d '{ "action": "wait", "selector": "#results", "state": "visible", "timeout": 10000 }'
+
+# Press keyboard key
+curl -X POST http://localhost:3000/sessions/$ID/act \
+  -H 'Content-Type: application/json' \
+  -d '{ "action": "keyboard", "key": "Enter" }'
+
+# Keyboard combo
+curl -X POST http://localhost:3000/sessions/$ID/act \
+  -H 'Content-Type: application/json' \
+  -d '{ "action": "keyboard", "key": "Control+a" }'
+
+# Hover (for dropdown menus)
+curl -X POST http://localhost:3000/sessions/$ID/act \
+  -H 'Content-Type: application/json' \
+  -d '{ "action": "hover", "ref": "r4" }'
+
+# Upload file
+curl -X POST http://localhost:3000/sessions/$ID/act \
+  -H 'Content-Type: application/json' \
+  -d '{ "action": "upload", "ref": "r8", "filePaths": ["/path/to/file.pdf"] }'
+
+# Configure dialog handling
+curl -X POST http://localhost:3000/sessions/$ID/act \
+  -H 'Content-Type: application/json' \
+  -d '{ "action": "dialog", "dialogAction": "accept", "promptText": "yes" }'
 ```
 
-#### Extract
+**Response** (all actions return the same shape):
+
+```json
+{
+  "success": true,
+  "snapshot": { "url": "...", "title": "...", "refs": [...] },
+  "url": "https://example.com/page"
+}
+```
+
+---
+
+### Extract
+
+```
+POST /sessions/:id/extract
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `mode` | string | Yes | `"text"`, `"markdown"`, or `"structured"` |
+| `selector` | string | No | CSS selector to scope extraction |
+| `schema` | object | For structured | JSON schema for structured extraction |
+| `maxLength` | number | No | Max characters returned (default: 4000) |
+
+**Modes:**
+
+| Mode | Engine | Best for |
+|------|--------|----------|
+| `text` | Mozilla Readability | Articles, blog posts, clean text |
+| `markdown` | Turndown | Preserving structure (headings, links, lists) |
+| `structured` | Custom heuristics | Extracting data (products, search results, tables) |
+
+**Structured extraction** uses smart heuristics:
+- Array schema → finds repeated elements, extracts properties per item
+- Object schema → extracts single object from scoped element
+- Property names like `url`, `href`, `image`, `src` auto-read from element attributes
+- Type coercion: string, number, integer, boolean
+
+**Examples:**
 
 ```bash
-# Plain text (via Readability)
-curl -X POST http://localhost:3000/sessions/abc123/extract \
+# Plain text
+curl -X POST http://localhost:3000/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "text" }'
 
-# Markdown (via Turndown)
-curl -X POST http://localhost:3000/sessions/abc123/extract \
+# Markdown from specific section
+curl -X POST http://localhost:3000/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
-  -d '{ "mode": "markdown" }'
+  -d '{ "mode": "markdown", "selector": "main" }'
 
-# Structured (extracts fields matching a JSON schema)
-curl -X POST http://localhost:3000/sessions/abc123/extract \
+# Structured data
+curl -X POST http://localhost:3000/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
-  -d '{ "mode": "structured", "schema": { "title": "string", "links": ["string"] } }'
+  -d '{
+    "mode": "structured",
+    "selector": ".product-list",
+    "schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "price": { "type": "number" },
+          "url": { "type": "string" }
+        }
+      }
+    }
+  }'
 ```
 
-#### Observe
+**Response:**
+
+```json
+{
+  "content": "Extracted text or markdown or structured data...",
+  "url": "https://example.com",
+  "title": "Example"
+}
+```
+
+---
+
+### Observe
+
+```
+GET /sessions/:id/observe
+```
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `scope` | string | — | CSS selector to restrict snapshot (`"#main"`, `"form.login"`) |
+| `verbosity` | string | `"normal"` | `"minimal"`, `"normal"`, or `"detailed"` |
+| `maxRefs` | number | — | Limit number of returned elements |
+
+**Verbosity levels:**
+
+| Level | Fields included |
+|-------|----------------|
+| `minimal` | ref, role, name |
+| `normal` | + value, checked, disabled, expanded, options |
+| `detailed` | + descriptions |
+
+**Response:**
+
+```json
+{
+  "url": "https://example.com",
+  "title": "Example",
+  "refs": [
+    { "ref": "r1", "role": "link", "name": "Home" },
+    { "ref": "r2", "role": "textbox", "name": "Search", "value": "" },
+    { "ref": "r3", "role": "button", "name": "Submit", "disabled": false }
+  ]
+}
+```
+
+---
+
+### Screenshot
+
+```
+GET /sessions/:id/screenshot
+```
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `fullPage` | boolean | `false` | Capture full scrollable page |
+| `quality` | number | `50` | JPEG quality (1-100) |
+
+**Response:** Binary JPEG image (`Content-Type: image/jpeg`)
 
 ```bash
-curl http://localhost:3000/sessions/abc123/observe
-# { "title": "...", "url": "...", "refs": [
-#     { "ref": "r1", "role": "link", "name": "Home" },
-#     { "ref": "r2", "role": "textbox", "name": "Search", "value": "" },
-#     { "ref": "r3", "role": "button", "name": "Submit" }
-# ]}
+curl http://localhost:3000/sessions/$ID/screenshot > page.jpg
+curl "http://localhost:3000/sessions/$ID/screenshot?fullPage=true&quality=90" > full.jpg
 ```
 
-#### Screenshot
+> **Note:** The REST API returns JPEG (configurable quality). The MCP tool returns base64 PNG.
 
-```bash
-curl http://localhost:3000/sessions/abc123/screenshot > page.jpg
+---
+
+### Health
+
+```
+GET /health
 ```
 
-#### Health
+**Response:**
 
-```bash
-curl http://localhost:3000/health
-# { "status": "ok", "sessions": 1 }
+```json
+{
+  "status": "ok",
+  "sessions": 2,
+  "config": {
+    "maxSessions": 10,
+    "sessionTimeoutMs": 300000,
+    "requestTimeoutMs": 30000
+  }
+}
 ```
+
+---
 
 ## How Snapshot+Refs Works
 
 Instead of dumping the full accessibility tree (thousands of nodes), abbwak:
 
-1. Walks the DOM and finds **interactive elements** (links, buttons, inputs, selects) plus **structural elements** (headings, landmarks)
-2. Stamps each with a stable `data-abbwak-ref` attribute (e.g., `r1`, `r2`)
-3. Returns a compact list of `{ ref, role, name, value?, checked?, disabled? }`
-4. Agents use ref IDs to target elements in subsequent `act` calls
+1. Walks the DOM and finds **interactive elements** (links, buttons, inputs, selects, contenteditable) plus **structural elements** (headings, landmarks, alerts)
+2. Filters out hidden elements (`display:none`, `visibility:hidden`, `opacity:0`, `aria-hidden`)
+3. Computes accessible names via ARIA labels, `<label>`, `alt`, `title`, `placeholder`, `textContent`
+4. Stamps each element with a stable `data-abbwak-ref` attribute (`r1`, `r2`, ...)
+5. Returns a compact list of `{ ref, role, name, value?, checked?, disabled?, options? }`
+6. Agents use ref IDs to target elements in subsequent `act` calls
 
 This typically reduces context by **~93%** compared to raw accessibility trees, saving tokens and improving agent reasoning.
 
+### Elements captured
+
+**Interactive:** `a[href]`, `button`, `input`, `textarea`, `select`, `[contenteditable]`, ARIA roles (`button`, `link`, `checkbox`, `radio`, `tab`, `menuitem`, `switch`, `slider`, `combobox`, `option`, `spinbutton`, `searchbox`, `treeitem`)
+
+**Structural:** `h1`-`h6`, `[role=heading]`, `[role=alert]`, `[role=alertdialog]`, `[role=status]`, `[role=dialog]`, `img[alt]`, `[aria-live]`, landmark roles
+
+---
+
 ## Configuration
 
-All config via environment variables:
+All configuration via environment variables:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ABBWAK_PORT` | `3000` | HTTP server port |
-| `ABBWAK_HOST` | `0.0.0.0` | HTTP server host |
-| `ABBWAK_MAX_SESSIONS` | `10` | Maximum concurrent sessions |
-| `ABBWAK_SESSION_TIMEOUT_MS` | `300000` | Session idle timeout (5 min) |
-| `ABBWAK_HEADLESS` | `true` | Run browser in headless mode |
-| `ABBWAK_BROWSER` | `chromium` | Browser engine (chromium/firefox/webkit) |
-| `ABBWAK_ALLOWED_DOMAINS` | (empty) | Comma-separated domain allowlist |
-| `ABBWAK_BLOCK_RESOURCES` | `image,font,media` | Resource types to block |
-| `ABBWAK_EXECUTABLE_PATH` | (auto) | Custom browser executable path |
-| `ABBWAK_VIEWPORT_WIDTH` | `1280` | Default viewport width |
-| `ABBWAK_VIEWPORT_HEIGHT` | `720` | Default viewport height |
-| `ABBWAK_LOG_LEVEL` | `info` | Log level (debug/info/warn/error/silent) |
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `ABBWAK_PORT` | int | `3000` | HTTP server port |
+| `ABBWAK_HOST` | string | `0.0.0.0` | HTTP server bind address |
+| `ABBWAK_MAX_SESSIONS` | int | `10` | Maximum concurrent browser sessions |
+| `ABBWAK_SESSION_TIMEOUT_MS` | int | `300000` | Session idle timeout in ms (5 min) |
+| `ABBWAK_REQUEST_TIMEOUT_MS` | int | `30000` | HTTP request timeout in ms (30s) |
+| `ABBWAK_HEADLESS` | bool | `true` | Run browser in headless mode |
+| `ABBWAK_BROWSER` | string | `firefox` | Browser engine: `chromium`, `firefox`, `webkit` |
+| `ABBWAK_ALLOWED_DOMAINS` | string | (empty) | Comma-separated domain allowlist (empty = all) |
+| `ABBWAK_BLOCK_RESOURCES` | string | `image,font,media` | Comma-separated resource types to block |
+| `ABBWAK_VIEWPORT_WIDTH` | int | `1280` | Default viewport width |
+| `ABBWAK_VIEWPORT_HEIGHT` | int | `720` | Default viewport height |
+| `ABBWAK_EXECUTABLE_PATH` | string | (auto) | Custom browser executable path |
+| `ABBWAK_LOG_LEVEL` | string | `info` | Log level: `silent`, `debug`, `info`, `warn`, `error` |
+
+---
 
 ## Docker
+
+### Build and run
 
 ```bash
 docker build -t abbwak .
 docker run -p 3000:3000 abbwak
 ```
 
-Or with Docker Compose:
+### Docker Compose
 
 ```bash
-docker compose up
+docker compose up        # Start
+docker compose up -d     # Start detached
+docker compose down      # Stop
 ```
+
+### MCP mode in Docker
+
+```bash
+docker run -i abbwak node dist/cli.js --mcp
+```
+
+### Image details
+
+- Base: `mcr.microsoft.com/playwright:v1.56.1-noble`
+- Browser: Firefox only (~400MB lighter than all browsers)
+- Memory: 2GB limit, 512MB reservation
+- Healthcheck: `GET /health` every 30s
+- Multi-stage build: TypeScript compiled in builder stage, only dist/ copied to production
+
+---
+
+## Error Handling
+
+All errors follow a consistent JSON format:
+
+```json
+{
+  "error": {
+    "code": "ACTION_FAILED",
+    "message": "Element ref \"r99\" not found in current snapshot",
+    "statusCode": 400
+  }
+}
+```
+
+| Error Code | HTTP Status | When |
+|------------|-------------|------|
+| `SESSION_NOT_FOUND` | 404 | Session ID doesn't exist |
+| `SESSION_LIMIT_REACHED` | 429 | Max concurrent sessions exceeded |
+| `NAVIGATION_FAILED` | 502 | Page failed to load |
+| `ACTION_FAILED` | 400 | Action execution failed |
+| `VALIDATION_ERROR` | 400 | Invalid request parameters |
+| `DOMAIN_NOT_ALLOWED` | 403 | URL blocked by domain allowlist |
+
+---
+
+## Security
+
+- **URL sanitization:** Blocks `javascript:`, `data:`, `file:`, `vbscript:` protocols; only `http`/`https` allowed
+- **Domain allowlist:** `ABBWAK_ALLOWED_DOMAINS` restricts which domains can be navigated to
+- **Selector sanitization:** CSS selectors validated against injection patterns
+- **Keyboard validation:** Only whitelisted keys and modifier combos allowed
+- **Rate limiting:** 100 requests/minute per IP
+- **CORS:** Configurable origin (default: permissive)
+- **Resource blocking:** Images, fonts, media blocked by default
+- **Session isolation:** Each session has its own BrowserContext (separate cookies, storage, cache)
+- **No downloads:** `acceptDownloads: false` on all contexts
+- **Request timeout:** 30s default, returns 504 Gateway Timeout on expiry
+
+---
 
 ## Testing
 
 ```bash
-npm test                            # Run all tests
-npm test -- test/unit/              # Unit tests only
-npm test -- test/integration/       # Integration tests only
-SKIP_HEAVY_BROWSER_TESTS=1 npm test # Skip click/type tests (for low-memory CI)
+npm test                              # All tests
+npm test -- test/unit/                # Unit tests only (72 tests)
+npm test -- test/integration/         # Integration tests (browser required)
+SKIP_HEAVY_BROWSER_TESTS=1 npm test   # Skip click/type tests (low-memory CI)
 ```
+
+### Test fixtures
+
+| Fixture | Tests |
+|---------|-------|
+| `login-form.html` | click, type, select, checkbox interactions |
+| `table-data.html` | Structured data extraction |
+| `search-results.html` | Text/markdown extraction |
+| `complex-spa.html` | Scroll, wait, dynamic content |
+
+---
+
+## Building from Source
+
+```bash
+npm install                          # Install dependencies
+npm run build                        # Compile to dist/ (ESM + DTS)
+npm run typecheck                    # TypeScript type checking
+npm run lint                         # Biome linter
+npm run lint:fix                     # Auto-fix lint issues
+```
+
+Build output:
+- `dist/index.js` — REST API server
+- `dist/cli.js` — CLI binary
+- `dist/mcp/server.js` — MCP server
+- `dist/*.d.ts` — TypeScript type declarations
+
+---
 
 ## Architecture
 
-```
-src/
-├── actions/          # click, type, select, scroll, navigate executors
-├── browser/          # Playwright engine, session, session-manager
-├── processing/       # snapshot (Refs), content extraction
-├── server/           # Fastify REST API + middleware + routes
-├── mcp/              # MCP server (stdio transport) + tool definitions
-├── utils/            # errors, logger, sanitize
-├── config.ts         # Env-based configuration
-└── index.ts          # Entry point
-```
+See [ARCHITECTURE.md](ARCHITECTURE.md) for technical deep-dive.
+
+See [ROADMAP.md](ROADMAP.md) for planned features.
 
 ## License
 
