@@ -48,8 +48,11 @@ export class BrowserEngine {
       "Launching browser",
     );
 
+    const executablePath = process.env.ABBWAK_EXECUTABLE_PATH || undefined;
+
     this.browser = await browserType.launch({
       headless,
+      executablePath,
       args: ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"],
     });
 
