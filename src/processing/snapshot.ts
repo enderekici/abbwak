@@ -114,13 +114,13 @@ export async function takeSnapshot(
     }) => {
       // -- helpers (run inside the browser) --------------------------------
 
-      function truncate(text: string, limit: number): string {
+      const truncate = (text: string, limit: number): string => {
         const cleaned = text.replace(/\s+/g, " ").trim();
         if (cleaned.length <= limit) return cleaned;
         return `${cleaned.slice(0, limit - 3)}...`;
-      }
+      };
 
-      function isHidden(el: Element): boolean {
+      const isHidden = (el: Element): boolean => {
         if (!(el instanceof HTMLElement)) return false;
         if (el.hidden) return true;
         if (el.getAttribute("aria-hidden") === "true") return true;
@@ -145,16 +145,16 @@ export async function takeSnapshot(
         return false;
       }
 
-      function isAncestorHidden(el: Element): boolean {
+      const isAncestorHidden = (el: Element): boolean => {
         let current: Element | null = el;
         while (current) {
           if (isHidden(current)) return true;
           current = current.parentElement;
         }
         return false;
-      }
+      };
 
-      function getImplicitRole(el: Element): string {
+      const getImplicitRole = (el: Element): string => {
         const tag = el.tagName.toLowerCase();
         switch (tag) {
           case "a":
@@ -207,9 +207,9 @@ export async function takeSnapshot(
           default:
             return "";
         }
-      }
+      };
 
-      function getAccessibleName(el: Element): string {
+      const getAccessibleName = (el: Element): string => {
         if (!(el instanceof HTMLElement)) return "";
 
         // 1. aria-labelledby (highest priority)
@@ -320,9 +320,9 @@ export async function takeSnapshot(
         }
 
         return "";
-      }
+      };
 
-      function getElementValue(el: Element): string | undefined {
+      const getElementValue = (el: Element): string | undefined => {
         if (el instanceof HTMLInputElement) {
           const type = el.type.toLowerCase();
           // Checked state is captured separately.
@@ -343,14 +343,14 @@ export async function takeSnapshot(
           return el.textContent?.trim() ?? "";
         }
         return undefined;
-      }
+      };
 
-      function getSelectOptions(el: Element): string[] | undefined {
+      const getSelectOptions = (el: Element): string[] | undefined => {
         if (!(el instanceof HTMLSelectElement)) return undefined;
         return Array.from(el.options).map(
           (o) => o.textContent?.trim() ?? o.value,
         );
-      }
+      };
 
       // -- main collection logic -------------------------------------------
 
