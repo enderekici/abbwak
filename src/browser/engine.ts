@@ -62,7 +62,7 @@ export class BrowserEngine {
   }
 
   isRunning(): boolean {
-    return this.browser?.isConnected();
+    return this.browser?.isConnected() ?? false;
   }
 
   async close(): Promise<void> {
