@@ -7,10 +7,6 @@
  */
 
 process.env.ABBWAK_LOG_LEVEL = 'silent';
-process.env.ABBWAK_EXECUTABLE_PATH =
-  process.env.ABBWAK_EXECUTABLE_PATH ||
-  process.env.CHROME_PATH ||
-  '/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome';
 
 import fs from 'node:fs';
 import http from 'node:http';
@@ -61,10 +57,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  sessions.stopCleanup();
-  await sessions.destroyAll();
-  await engine.close();
-  await app.close();
+  sessions?.stopCleanup();
+  await sessions?.destroyAll();
+  await engine?.close();
+  await app?.close();
   fixtureServer?.close();
 });
 

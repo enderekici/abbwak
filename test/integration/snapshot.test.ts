@@ -2,7 +2,15 @@ process.env.PLAYWRIGHT_BROWSERS_PATH = `${process.env.HOME}/.cache/ms-playwright
 process.env.ABBWAK_LOG_LEVEL = 'silent';
 
 import path from 'node:path';
-import { type Browser, type BrowserContext, type Page, chromium } from 'playwright';
+import {
+  type Browser,
+  type BrowserContext,
+  type BrowserType,
+  type Page,
+  chromium,
+  firefox,
+  webkit,
+} from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { formatSnapshot, takeSnapshot } from '../../src/processing/snapshot.js';
 
@@ -12,17 +20,19 @@ const complexSpaUrl = `file://${path.join(FIXTURES_DIR, 'complex-spa.html')}`;
 const searchResultsUrl = `file://${path.join(FIXTURES_DIR, 'search-results.html')}`;
 const tableDataUrl = `file://${path.join(FIXTURES_DIR, 'table-data.html')}`;
 
-const CHROME_PATH =
-  process.env.CHROME_PATH || '/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome';
+const browserTypes: Record<string, BrowserType> = { chromium, firefox, webkit };
+const BROWSER_NAME = process.env.ABBWAK_BROWSER || 'firefox';
+const browserType = browserTypes[BROWSER_NAME] || firefox;
 
 let browser: Browser;
 let ctx: BrowserContext;
 let page: Page;
 
 beforeAll(async () => {
-  browser = await chromium.launch({
+  const executablePath = process.env.ABBWAK_EXECUTABLE_PATH || undefined;
+  browser = await browserType.launch({
     headless: true,
-    executablePath: CHROME_PATH,
+    executablePath,
     args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--single-process'],
   });
   ctx = await browser.newContext();

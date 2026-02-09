@@ -10,9 +10,12 @@ import path from 'node:path';
 import {
   type Browser,
   type BrowserContext,
+  type BrowserType,
   type ElementHandle,
   type Page,
   chromium,
+  firefox,
+  webkit,
 } from 'playwright';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { executeClick } from '../../src/actions/click.js';
@@ -28,8 +31,9 @@ const loginFormUrl = `file://${path.join(FIXTURES_DIR, 'login-form.html')}`;
 const complexSpaUrl = `file://${path.join(FIXTURES_DIR, 'complex-spa.html')}`;
 const tableDataUrl = `file://${path.join(FIXTURES_DIR, 'table-data.html')}`;
 
-const CHROME_PATH =
-  process.env.CHROME_PATH || '/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome';
+const browserTypes: Record<string, BrowserType> = { chromium, firefox, webkit };
+const BROWSER_NAME = process.env.ABBWAK_BROWSER || 'firefox';
+const browserType = browserTypes[BROWSER_NAME] || firefox;
 const LAUNCH_ARGS = [
   '--no-sandbox',
   '--disable-gpu',
@@ -40,9 +44,10 @@ const LAUNCH_ARGS = [
 let browser: Browser;
 
 beforeAll(async () => {
-  browser = await chromium.launch({
+  const executablePath = process.env.ABBWAK_EXECUTABLE_PATH || undefined;
+  browser = await browserType.launch({
     headless: true,
-    executablePath: CHROME_PATH,
+    executablePath,
     args: LAUNCH_ARGS,
   });
 });
