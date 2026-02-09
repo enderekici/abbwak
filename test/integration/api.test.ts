@@ -7,15 +7,12 @@
  */
 
 process.env.ABBWAK_LOG_LEVEL = 'silent';
-process.env.ABBWAK_EXECUTABLE_PATH = process.env.ABBWAK_EXECUTABLE_PATH
-  || process.env.CHROME_PATH
-  || '/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome';
 
-import http from 'node:http';
 import fs from 'node:fs';
+import http from 'node:http';
 import path from 'node:path';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { BrowserEngine } from '../../src/browser/engine.js';
 import { SessionManager } from '../../src/browser/session-manager.js';
 import { buildApp } from '../../src/server/app.js';
@@ -60,10 +57,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  sessions.stopCleanup();
-  await sessions.destroyAll();
-  await engine.close();
-  await app.close();
+  sessions?.stopCleanup();
+  await sessions?.destroyAll();
+  await engine?.close();
+  await app?.close();
   fixtureServer?.close();
 });
 
@@ -238,7 +235,9 @@ describe('Act flow', () => {
     expect(actRes.statusCode).toBe(200);
     const actBody = JSON.parse(actRes.body);
     expect(actBody.success).toBe(true);
-    expect(actBody.snapshot.refs.find((r: any) => r.role === 'combobox')?.value).toBe('Electronics');
+    expect(actBody.snapshot.refs.find((r: any) => r.role === 'combobox')?.value).toBe(
+      'Electronics',
+    );
   });
 
   it('should scroll via the API', async () => {

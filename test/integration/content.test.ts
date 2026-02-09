@@ -1,9 +1,17 @@
-process.env.PLAYWRIGHT_BROWSERS_PATH = process.env.HOME + '/.cache/ms-playwright';
+process.env.PLAYWRIGHT_BROWSERS_PATH = `${process.env.HOME}/.cache/ms-playwright`;
 process.env.ABBWAK_LOG_LEVEL = 'silent';
 
 import path from 'node:path';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { chromium, type Browser, type BrowserContext, type Page } from 'playwright';
+import {
+  type Browser,
+  type BrowserContext,
+  type BrowserType,
+  type Page,
+  chromium,
+  firefox,
+  webkit,
+} from 'playwright';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { extractContent } from '../../src/processing/content.js';
 
 const FIXTURES_DIR = path.resolve('test/fixtures');
@@ -11,16 +19,19 @@ const searchResultsUrl = `file://${path.join(FIXTURES_DIR, 'search-results.html'
 const tableDataUrl = `file://${path.join(FIXTURES_DIR, 'table-data.html')}`;
 const loginFormUrl = `file://${path.join(FIXTURES_DIR, 'login-form.html')}`;
 
-const CHROME_PATH = process.env.CHROME_PATH || '/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome';
+const browserTypes: Record<string, BrowserType> = { chromium, firefox, webkit };
+const BROWSER_NAME = process.env.ABBWAK_BROWSER || 'firefox';
+const browserType = browserTypes[BROWSER_NAME] || firefox;
 
 let browser: Browser;
 let ctx: BrowserContext;
 let page: Page;
 
 beforeAll(async () => {
-  browser = await chromium.launch({
+  const executablePath = process.env.ABBWAK_EXECUTABLE_PATH || undefined;
+  browser = await browserType.launch({
     headless: true,
-    executablePath: CHROME_PATH,
+    executablePath,
     args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--single-process'],
   });
   ctx = await browser.newContext();
@@ -257,9 +268,7 @@ describe('extractContent mode=structured', () => {
   });
 
   it('should throw ValidationError when schema is missing', async () => {
-    await expect(
-      extractContent(page, { mode: 'structured' }),
-    ).rejects.toThrow('requires a schema');
+    await expect(extractContent(page, { mode: 'structured' })).rejects.toThrow('requires a schema');
   });
 
   it('should throw ValidationError when array schema lacks a selector', async () => {
@@ -318,8 +327,8 @@ describe('extractContent maxLength truncation', () => {
 describe('extractContent invalid mode', () => {
   it('should throw ValidationError for unknown mode', async () => {
     await page.goto(loginFormUrl, { waitUntil: 'load' });
-    await expect(
-      extractContent(page, { mode: 'xml' as 'text' }),
-    ).rejects.toThrow('Unknown extraction mode');
+    await expect(extractContent(page, { mode: 'xml' as 'text' })).rejects.toThrow(
+      'Unknown extraction mode',
+    );
   });
 });
