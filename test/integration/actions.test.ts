@@ -169,7 +169,7 @@ heavyDescribe('executeClick', () => {
 
   it('should click by CSS selector', async () => {
     await goTo(loginFormUrl);
-    const result = await executeClick(makeSession(), { selector: 'a[href="/forgot-password"]' });
+    const result = await executeClick(makeSession(), { selector: 'button[type="submit"]' });
     expect(result.success).toBe(true);
   });
 });
