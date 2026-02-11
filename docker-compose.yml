@@ -2,6 +2,7 @@ services:
   # REST API server (default) — http://localhost:3000
   steer:
     build: .
+    shm_size: 2gb
     ports:
       - "3000:3000"
     environment:
@@ -38,6 +39,7 @@ services:
   # Connect with: { "mcpServers": { "steer": { "url": "http://localhost:3001/mcp" } } }
   steer-mcp:
     build: .
+    shm_size: 2gb
     ports:
       - "3001:3001"
     command: ["node", "dist/cli.js", "--mcp-http"]

@@ -94,10 +94,19 @@ jobs:
 
       - name: Smoke test
         run: |
-          docker run -d --name steer-test -p 3000:3000 ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
-          sleep 15
-          curl -sf http://localhost:3000/health | grep -q '"status":"ok"'
+          docker run -d --name steer-test --shm-size=2g -p 3000:3000 ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/health | grep -q '"status":"ok"'; then
+              echo "Health check passed"
+              docker stop steer-test
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Health check failed"
+          docker logs steer-test
           docker stop steer-test
+          exit 1
 
       - name: Push
         if: github.event_name != 'pull_request'
