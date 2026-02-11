@@ -20,15 +20,15 @@ LABEL version="1.2.0"
 
 WORKDIR /app
 
-# Create non-root user
-RUN groupadd -g 1001 steer && \
-    useradd -u 1001 -g steer -s /bin/bash steer
+# Create non-root user (use high IDs to avoid conflicts with base image)
+RUN groupadd -g 10001 steer && \
+    useradd -u 10001 -g steer -s /bin/bash steer
 
 # Install only Firefox browser (saves ~400MB vs all browsers)
 RUN npx playwright install --with-deps firefox
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts
 
 COPY --from=builder /app/dist/ dist/
 
