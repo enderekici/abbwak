@@ -17,22 +17,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
-
       - run: npm ci
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Security audit
-        run: npm audit
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm audit
         continue-on-error: true
 
   test:
@@ -40,38 +32,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
-
       - run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Verify CLI
-        run: node dist/cli.js --help
-
-      - name: Install Firefox
-        run: npx playwright install --with-deps firefox
-
-      - name: Run tests
-        run: npm test
-        env:
-          STEER_BROWSER: firefox
-
-      - name: Coverage
+      - run: npm run build
+      - run: node dist/cli.js --help
+      - run: npx playwright install --with-deps firefox
+      - name: Tests with coverage
         run: npm run test:coverage
         env:
           STEER_BROWSER: firefox
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v4
         with:
           file: ./coverage/lcov.info
-          flags: unittests
         continue-on-error: true
 
   docker:
@@ -82,10 +57,8 @@ jobs:
       contents: read
       packages: write
       security-events: write
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
@@ -96,8 +69,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
+      - id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
@@ -109,7 +81,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
 
-      - name: Build image
+      - name: Build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -127,7 +99,7 @@ jobs:
           curl -sf http://localhost:3000/health | grep -q '"status":"ok"'
           docker stop steer-test
 
-      - name: Push image
+      - name: Push
         if: github.event_name != 'pull_request'
         uses: docker/build-push-action@v5
         with:
@@ -139,7 +111,7 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
 
-      - name: Trivy security scan
+      - name: Trivy scan
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
