@@ -65,9 +65,9 @@ describe('config default values (when env vars are not overridden)', () => {
   // These tests verify the well-known defaults. If the test environment has
   // the corresponding env vars set, these may need adjustment.
 
-  it('should default port to 3000', () => {
+  it('should default port to 3010', () => {
     if (!process.env.STEER_PORT) {
-      expect(config.port).toBe(3000);
+      expect(config.port).toBe(3010);
     }
   });
 

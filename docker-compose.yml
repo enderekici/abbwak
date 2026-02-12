@@ -1,12 +1,12 @@
 services:
-  # REST API server (default) — http://localhost:3000
+  # REST API server (default) — http://localhost:3010
   steer:
     build: .
     shm_size: 2gb
     ports:
-      - "3000:3000"
+      - "3010:3010"
     environment:
-      - STEER_PORT=3000
+      - STEER_PORT=3010
       - STEER_HEADLESS=true
       - STEER_BROWSER=firefox
       - STEER_MAX_SESSIONS=10
@@ -36,15 +36,15 @@ services:
           cpus: '0.5'
 
   # MCP server (HTTP transport) — for Claude Desktop / Claude Code via Docker
-  # Connect with: { "mcpServers": { "steer": { "url": "http://localhost:3001/mcp" } } }
+  # Connect with: { "mcpServers": { "steer": { "url": "http://localhost:3011/mcp" } } }
   steer-mcp:
     build: .
     shm_size: 2gb
     ports:
-      - "3001:3001"
+      - "3011:3011"
     command: ["node", "dist/cli.js", "--mcp-http"]
     environment:
-      - STEER_MCP_PORT=3001
+      - STEER_MCP_PORT=3011
       - STEER_HOST=0.0.0.0
       - STEER_HEADLESS=true
       - STEER_BROWSER=firefox
@@ -63,7 +63,7 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r=>{if(!r.ok)throw 1})"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3011/health').then(r=>{if(!r.ok)throw 1})"]
       interval: 30s
       timeout: 5s
       retries: 3

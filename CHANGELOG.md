@@ -45,7 +45,7 @@ Added MCP Streamable HTTP transport, enabling Docker-based MCP deployments that 
 ### Added
 
 - **MCP Streamable HTTP transport** (`--mcp-http` CLI flag): Run the MCP server as a long-lived HTTP service instead of stdio. Supports multiple concurrent client sessions.
-- **Docker MCP service** (`steer-mcp`): New service in `docker-compose.yml` that runs the MCP server on port 3001, accessible at `http://localhost:3001/mcp`.
+- **Docker MCP service** (`steer-mcp`): New service in `docker-compose.yml` that runs the MCP server on port 3011, accessible at `http://localhost:3011/mcp`.
 - **MCP HTTP dev script** (`npm run mcp:http:dev`): Development mode for the HTTP transport.
 - Docker Compose configuration for both REST API and MCP services with resource limits, healthchecks, and security options.
 - Documentation for connecting Claude Desktop and Claude Code to the Dockerized MCP server via the `url` field in MCP configuration.

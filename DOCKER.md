@@ -32,23 +32,23 @@ This produces a lean image with no TypeScript source, no dev dependencies, and o
 ### REST API server
 
 ```bash
-docker run -p 3000:3000 steer
+docker run -p 3010:3010 steer
 ```
 
-The server is accessible at `http://localhost:3000`.
+The server is accessible at `http://localhost:3010`.
 
 ### MCP server (HTTP transport)
 
 ```bash
-docker run -d -p 3001:3001 steer node dist/cli.js --mcp-http
+docker run -d -p 3011:3011 steer node dist/cli.js --mcp-http
 ```
 
-The MCP endpoint is accessible at `http://localhost:3001/mcp`.
+The MCP endpoint is accessible at `http://localhost:3011/mcp`.
 
 ### With environment variables
 
 ```bash
-docker run -p 3000:3000 \
+docker run -p 3010:3010 \
   -e STEER_MAX_SESSIONS=5 \
   -e STEER_SESSION_TIMEOUT_MS=600000 \
   -e STEER_BROWSER=firefox \
@@ -59,7 +59,7 @@ docker run -p 3000:3000 \
 ### With resource limits
 
 ```bash
-docker run -p 3000:3000 \
+docker run -p 3010:3010 \
   --memory=2g \
   --cpus=2.0 \
   steer
@@ -73,8 +73,8 @@ The `docker-compose.yml` defines two services:
 
 | Service | Description | Port |
 |---------|-------------|------|
-| `steer` | REST API server | 3000 |
-| `steer-mcp` | MCP server (Streamable HTTP transport) | 3001 |
+| `steer` | REST API server | 3010 |
+| `steer-mcp` | MCP server (Streamable HTTP transport) | 3011 |
 
 ### Start the REST API server
 
@@ -117,7 +117,7 @@ All configuration is done through environment variables. Set them in `docker-com
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `STEER_PORT` | `3000` | HTTP server port |
+| `STEER_PORT` | `3010` | HTTP server port |
 | `STEER_HOST` | `0.0.0.0` | HTTP server bind address |
 | `STEER_MAX_SESSIONS` | `10` | Maximum concurrent browser sessions |
 | `STEER_SESSION_TIMEOUT_MS` | `300000` | Session idle timeout in ms (5 min) |
@@ -129,7 +129,7 @@ All configuration is done through environment variables. Set them in `docker-com
 | `STEER_VIEWPORT_WIDTH` | `1280` | Default viewport width |
 | `STEER_VIEWPORT_HEIGHT` | `720` | Default viewport height |
 | `STEER_EXECUTABLE_PATH` | (auto) | Custom browser executable path |
-| `STEER_MCP_PORT` | `3001` | MCP HTTP server port |
+| `STEER_MCP_PORT` | `3011` | MCP HTTP server port |
 | `STEER_LOG_LEVEL` | `info` | Log level: `silent`, `debug`, `info`, `warn`, `error` |
 
 ### Domain allowlist example
@@ -188,7 +188,7 @@ deploy:
 Or with `docker run`:
 
 ```bash
-docker run -p 3000:3000 --memory=4g --cpus=4.0 steer
+docker run -p 3010:3010 --memory=4g --cpus=4.0 steer
 ```
 
 ---
@@ -246,7 +246,7 @@ The Dockerfile includes a built-in health check:
 
 ```dockerfile
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD node -e "fetch('http://localhost:3000/health').then(r=>{if(!r.ok)throw 1})"
+  CMD node -e "fetch('http://localhost:3010/health').then(r=>{if(!r.ok)throw 1})"
 ```
 
 ### MCP service
@@ -255,7 +255,7 @@ The MCP service in Docker Compose has its own health check:
 
 ```yaml
 healthcheck:
-  test: ["CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r=>{if(!r.ok)throw 1})"]
+  test: ["CMD", "node", "-e", "fetch('http://localhost:3011/health').then(r=>{if(!r.ok)throw 1})"]
   interval: 30s
   timeout: 5s
   retries: 3
@@ -264,7 +264,7 @@ healthcheck:
 ### Manual health check
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:3010/health
 ```
 
 Response:
@@ -294,7 +294,7 @@ docker compose up -d steer-mcp
 Verify it is running:
 
 ```bash
-curl http://localhost:3001/health
+curl http://localhost:3011/health
 ```
 
 ### Step 2: Configure Claude Desktop
@@ -308,7 +308,7 @@ Add the following to your Claude Desktop configuration file:
 {
   "mcpServers": {
     "steer": {
-      "url": "http://localhost:3001/mcp"
+      "url": "http://localhost:3011/mcp"
     }
   }
 }
@@ -328,7 +328,7 @@ Add the following to `.claude/settings.json` (project-level) or `~/.claude/setti
 {
   "mcpServers": {
     "steer": {
-      "url": "http://localhost:3001/mcp"
+      "url": "http://localhost:3011/mcp"
     }
   }
 }
@@ -376,7 +376,7 @@ docker logs <container-id>
 ```
 
 Common causes:
-- Port already in use (another process on port 3000 or 3001)
+- Port already in use (another process on port 3010 or 3011)
 - Insufficient memory (browser fails to launch)
 
 ### Browser fails to launch
@@ -439,17 +439,17 @@ Each browser session consumes 50-150MB. To reduce memory usage:
 
 ### Port conflicts
 
-If port 3000 or 3001 is already in use, map to a different host port:
+If port 3010 or 3011 is already in use, map to a different host port:
 
 ```bash
-docker run -p 8080:3000 steer
+docker run -p 8080:3010 steer
 ```
 
 Or update `docker-compose.yml`:
 
 ```yaml
 ports:
-  - "8080:3000"
+  - "8080:3010"
 ```
 
 ### Building on ARM (Apple Silicon)

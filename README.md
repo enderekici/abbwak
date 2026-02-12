@@ -44,7 +44,7 @@ npm run mcp:dev
 
 ```bash
 docker compose up
-# Server running at http://localhost:3000
+# Server running at http://localhost:3010
 ```
 
 ### Option 3: Global install
@@ -53,18 +53,22 @@ docker compose up
 npm install -g steer
 npx playwright install firefox
 
-steer              # REST API on http://0.0.0.0:3000
+steer              # REST API on http://0.0.0.0:3010
 steer --mcp        # MCP server (stdio transport)
 steer --help       # Show all options
 ```
 
 ---
 
-## MCP Setup (Claude Desktop / Claude Code)
+## MCP Integration
 
-### Claude Desktop (local npm)
+steer works with any MCP-compatible client. Below are setup instructions for popular AI tools.
+
+### Claude Desktop
 
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+**Local (stdio):**
 
 ```json
 {
@@ -77,37 +81,35 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 }
 ```
 
-### Claude Desktop (Docker)
-
-Start the MCP server as a Docker container, then connect via HTTP:
+**Docker (HTTP):**
 
 ```bash
 docker compose up -d steer-mcp
-# MCP server listening at http://localhost:3001/mcp
+# MCP server listening at http://localhost:3011/mcp
 ```
 
 ```json
 {
   "mcpServers": {
     "steer": {
-      "url": "http://localhost:3001/mcp"
+      "url": "http://localhost:3011/mcp"
     }
   }
 }
 ```
-
-This uses the MCP Streamable HTTP transport — the container runs as a long-lived service and Claude Desktop connects over HTTP. No stdio pipe needed.
 
 Without Docker Compose:
 
 ```bash
 docker build -t steer .
-docker run -d -p 3001:3001 --name steer-mcp steer node dist/cli.js --mcp-http
+docker run -d -p 3011:3011 --name steer-mcp steer node dist/cli.js --mcp-http
 ```
 
-### Claude Code (local npm)
+### Claude Code
 
-Add to `.claude/settings.json`:
+Add to `.claude/settings.json` or run `claude mcp add`:
+
+**Local (stdio):**
 
 ```json
 {
@@ -120,17 +122,117 @@ Add to `.claude/settings.json`:
 }
 ```
 
-### Claude Code (Docker)
+**Docker (HTTP):**
 
 ```json
 {
   "mcpServers": {
     "steer": {
-      "url": "http://localhost:3001/mcp"
+      "url": "http://localhost:3011/mcp"
     }
   }
 }
 ```
+
+### Cursor
+
+Add to Cursor's MCP settings (Settings > MCP Servers > Add):
+
+**Local (stdio):**
+
+```json
+{
+  "mcpServers": {
+    "steer": {
+      "command": "npx",
+      "args": ["steer", "--mcp"]
+    }
+  }
+}
+```
+
+**Docker (HTTP):**
+
+```json
+{
+  "mcpServers": {
+    "steer": {
+      "url": "http://localhost:3011/mcp"
+    }
+  }
+}
+```
+
+### Windsurf
+
+Add to `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "steer": {
+      "command": "npx",
+      "args": ["steer", "--mcp"]
+    }
+  }
+}
+```
+
+### VS Code (Copilot)
+
+Add to `.vscode/mcp.json` in your workspace or user settings:
+
+```json
+{
+  "servers": {
+    "steer": {
+      "command": "npx",
+      "args": ["steer", "--mcp"]
+    }
+  }
+}
+```
+
+### Gemini CLI
+
+Add to `~/.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "steer": {
+      "command": "npx",
+      "args": ["steer", "--mcp"]
+    }
+  }
+}
+```
+
+### OpenAI Codex CLI
+
+Add to `~/.codex/config.json`:
+
+```json
+{
+  "mcpServers": {
+    "steer": {
+      "command": "npx",
+      "args": ["steer", "--mcp"]
+    }
+  }
+}
+```
+
+### Any MCP-Compatible Client
+
+steer supports two transports:
+
+| Transport | Use when | Config |
+|-----------|----------|--------|
+| **stdio** | Client spawns the process | `"command": "npx", "args": ["steer", "--mcp"]` |
+| **Streamable HTTP** | Server runs separately (Docker, remote) | `"url": "http://localhost:3011/mcp"` |
+
+For stdio, point your client at `npx steer --mcp`. For HTTP, start the server first (`steer --mcp-http` or via Docker) and point your client at the `/mcp` endpoint.
 
 ### MCP Tools
 
@@ -167,7 +269,7 @@ Agent: browser_extract({ mode: "markdown" })
 
 ## REST API Reference
 
-Base URL: `http://localhost:3000`
+Base URL: `http://localhost:3010`
 
 ### Sessions
 
@@ -330,52 +432,52 @@ Timeout: default 5000ms, max 30000ms. If no selector given, waits for network id
 
 ```bash
 # Click
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "click", "ref": "r5" }'
 
 # Type
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "type", "ref": "r3", "value": "hello world" }'
 
 # Select dropdown
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "select", "ref": "r7", "value": "option2" }'
 
 # Scroll
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "scroll", "direction": "down" }'
 
 # Wait for element
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "wait", "selector": "#results", "state": "visible", "timeout": 10000 }'
 
 # Press keyboard key
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "keyboard", "key": "Enter" }'
 
 # Keyboard combo
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "keyboard", "key": "Control+a" }'
 
 # Hover (for dropdown menus)
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "hover", "ref": "r4" }'
 
 # Upload file
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "upload", "ref": "r8", "filePaths": ["/path/to/file.pdf"] }'
 
 # Configure dialog handling
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "dialog", "dialogAction": "accept", "promptText": "yes" }'
 ```
@@ -423,17 +525,17 @@ POST /sessions/:id/extract
 
 ```bash
 # Plain text
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "text" }'
 
 # Markdown from specific section
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "markdown", "selector": "main" }'
 
 # Structured data
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{
     "mode": "structured",
@@ -514,8 +616,8 @@ GET /sessions/:id/screenshot
 **Response:** Binary JPEG image (`Content-Type: image/jpeg`)
 
 ```bash
-curl http://localhost:3000/sessions/$ID/screenshot > page.jpg
-curl "http://localhost:3000/sessions/$ID/screenshot?fullPage=true&quality=90" > full.jpg
+curl http://localhost:3010/sessions/$ID/screenshot > page.jpg
+curl "http://localhost:3010/sessions/$ID/screenshot?fullPage=true&quality=90" > full.jpg
 ```
 
 > **Note:** The REST API returns JPEG (configurable quality). The MCP tool returns base64 PNG.
@@ -571,7 +673,7 @@ All configuration via environment variables:
 
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
-| `STEER_PORT` | int | `3000` | HTTP server port |
+| `STEER_PORT` | int | `3010` | HTTP server port |
 | `STEER_HOST` | string | `0.0.0.0` | HTTP server bind address |
 | `STEER_MAX_SESSIONS` | int | `10` | Maximum concurrent browser sessions |
 | `STEER_SESSION_TIMEOUT_MS` | int | `300000` | Session idle timeout in ms (5 min) |
@@ -583,7 +685,7 @@ All configuration via environment variables:
 | `STEER_VIEWPORT_WIDTH` | int | `1280` | Default viewport width |
 | `STEER_VIEWPORT_HEIGHT` | int | `720` | Default viewport height |
 | `STEER_EXECUTABLE_PATH` | string | (auto) | Custom browser executable path |
-| `STEER_MCP_PORT` | int | `3001` | MCP HTTP server port |
+| `STEER_MCP_PORT` | int | `3011` | MCP HTTP server port |
 | `STEER_LOG_LEVEL` | string | `info` | Log level: `silent`, `debug`, `info`, `warn`, `error` |
 
 ---
@@ -596,21 +698,21 @@ All configuration via environment variables:
 docker build -t steer .
 
 # REST API server
-docker run -p 3000:3000 steer
+docker run -p 3010:3010 steer
 
 # MCP server (HTTP transport)
-docker run -d -p 3001:3001 steer node dist/cli.js --mcp-http
+docker run -d -p 3011:3011 steer node dist/cli.js --mcp-http
 ```
 
 ### Docker Compose
 
 ```bash
 # REST API server (default)
-docker compose up steer         # Start REST API on port 3000
+docker compose up steer         # Start REST API on port 3010
 docker compose up -d steer      # Start detached
 
 # MCP server (HTTP transport)
-docker compose up steer-mcp     # Start MCP on port 3001
+docker compose up steer-mcp     # Start MCP on port 3011
 docker compose up -d steer-mcp  # Start detached
 
 # Both services
@@ -620,8 +722,8 @@ docker compose down              # Stop all
 ```
 
 The `docker-compose.yml` includes two services:
-- **`steer`** — REST API server on port 3000
-- **`steer-mcp`** — MCP server on port 3001 (Streamable HTTP transport)
+- **`steer`** — REST API server on port 3010
+- **`steer-mcp`** — MCP server on port 3011 (Streamable HTTP transport)
 
 ### Connecting Claude Desktop to Docker MCP
 
@@ -635,7 +737,7 @@ The `docker-compose.yml` includes two services:
    {
      "mcpServers": {
        "steer": {
-         "url": "http://localhost:3001/mcp"
+         "url": "http://localhost:3011/mcp"
        }
      }
    }

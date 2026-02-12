@@ -44,7 +44,7 @@ npm run dev
 npm run mcp:dev
 ```
 
-The REST API server starts at `http://localhost:3000` by default. The MCP server uses stdio transport for direct integration with Claude Desktop and similar tools.
+The REST API server starts at `http://localhost:3010` by default. The MCP server uses stdio transport for direct integration with Claude Desktop and similar tools.
 
 ### Useful Commands
 
@@ -66,7 +66,7 @@ steer is configured entirely via environment variables prefixed with `STEER_`. T
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `STEER_PORT` | `3000` | REST API server port |
+| `STEER_PORT` | `3010` | REST API server port |
 | `STEER_HEADLESS` | `true` | Set to `false` to see the browser window |
 | `STEER_BROWSER` | `firefox` | Browser engine: `chromium`, `firefox`, `webkit` |
 | `STEER_LOG_LEVEL` | `info` | Log verbosity: `debug`, `info`, `warn`, `error` |

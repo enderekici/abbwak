@@ -35,7 +35,7 @@ npx playwright install firefox
 npm run dev
 ```
 
-The server starts at `http://localhost:3000`. You should see log output confirming the browser launched and the server is listening.
+The server starts at `http://localhost:3010`. You should see log output confirming the browser launched and the server is listening.
 
 ### MCP Server (for Claude Desktop / Claude Code)
 
@@ -54,7 +54,7 @@ Open a new terminal and follow these steps. Each step builds on the previous one
 ### 1. Check Server Health
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:3010/health
 ```
 
 Expected response:
@@ -74,7 +74,7 @@ Expected response:
 ### 2. Create a Session
 
 ```bash
-curl -X POST http://localhost:3000/sessions \
+curl -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' \
   -d '{}'
 ```
@@ -98,7 +98,7 @@ export ID="abc123xyz"
 ### 3. Navigate to a Page
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/navigate \
+curl -X POST http://localhost:3010/sessions/$ID/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://example.com" }'
 ```
@@ -125,17 +125,17 @@ Response includes a snapshot of the page with ref IDs for interactive elements:
 Get the current accessibility snapshot without performing any action:
 
 ```bash
-curl http://localhost:3000/sessions/$ID/observe
+curl http://localhost:3010/sessions/$ID/observe
 ```
 
 Use query parameters for more control:
 
 ```bash
 # Minimal output (fewer tokens)
-curl "http://localhost:3000/sessions/$ID/observe?verbosity=minimal"
+curl "http://localhost:3010/sessions/$ID/observe?verbosity=minimal"
 
 # Limit to 5 elements
-curl "http://localhost:3000/sessions/$ID/observe?maxRefs=5"
+curl "http://localhost:3010/sessions/$ID/observe?maxRefs=5"
 ```
 
 ### 5. Perform an Action
@@ -143,7 +143,7 @@ curl "http://localhost:3000/sessions/$ID/observe?maxRefs=5"
 Click a link using its ref ID from the snapshot:
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "click", "ref": "r2" }'
 ```
@@ -155,7 +155,7 @@ Every action returns a fresh snapshot, so you always know the current state of t
 Pull the page content as clean markdown:
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "markdown" }'
 ```
@@ -164,12 +164,12 @@ Other extraction modes:
 
 ```bash
 # Plain text (uses Mozilla Readability)
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "text" }'
 
 # Structured data with a JSON schema
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{
     "mode": "structured",
@@ -186,13 +186,13 @@ curl -X POST http://localhost:3000/sessions/$ID/extract \
 ### 7. Take a Screenshot
 
 ```bash
-curl http://localhost:3000/sessions/$ID/screenshot > page.jpg
+curl http://localhost:3010/sessions/$ID/screenshot > page.jpg
 ```
 
 ### 8. Clean Up
 
 ```bash
-curl -X DELETE http://localhost:3000/sessions/$ID
+curl -X DELETE http://localhost:3010/sessions/$ID
 ```
 
 Sessions also auto-expire after 5 minutes of inactivity.
@@ -207,7 +207,7 @@ If you prefer running steer in a container:
 # Build and start the REST API
 docker compose up steer
 
-# Server available at http://localhost:3000
+# Server available at http://localhost:3010
 ```
 
 To run both the REST API and MCP server:
@@ -217,8 +217,8 @@ docker compose up -d
 ```
 
 This starts:
-- **REST API** on port 3000
-- **MCP server** (HTTP transport) on port 3001
+- **REST API** on port 3010
+- **MCP server** (HTTP transport) on port 3011
 
 Stop everything with:
 
@@ -260,7 +260,7 @@ docker compose up -d steer-mcp
 {
   "mcpServers": {
     "steer": {
-      "url": "http://localhost:3001/mcp"
+      "url": "http://localhost:3011/mcp"
     }
   }
 }
@@ -293,7 +293,7 @@ Add to `.claude/settings.json` in your project or home directory:
 {
   "mcpServers": {
     "steer": {
-      "url": "http://localhost:3001/mcp"
+      "url": "http://localhost:3011/mcp"
     }
   }
 }

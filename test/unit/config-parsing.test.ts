@@ -38,7 +38,7 @@ describe('config env var parsing', () => {
   it('should fall back to default for invalid STEER_PORT', async () => {
     process.env.STEER_PORT = 'abc';
     const { config } = await import('../../src/config.js');
-    expect(config.port).toBe(3000);
+    expect(config.port).toBe(3010);
   });
 
   it('should parse STEER_HEADLESS as boolean true', async () => {

@@ -175,7 +175,7 @@ GET /sessions/:id/performance
 Replace HTTP polling with WebSocket for real-time updates.
 
 ```
-ws://localhost:3000/sessions/:id/ws
+ws://localhost:3010/sessions/:id/ws
 ```
 
 - Stream page events (navigation, dialog, console)
@@ -213,7 +213,7 @@ TypeScript SDK for building agents on top of steer.
 ```typescript
 import { SteerClient } from "steer/client";
 
-const browser = new SteerClient("http://localhost:3000");
+const browser = new SteerClient("http://localhost:3010");
 const session = await browser.createSession();
 await session.navigate("https://example.com");
 const results = await session.observe({ verbosity: "minimal" });

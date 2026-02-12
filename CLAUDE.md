@@ -164,7 +164,7 @@ SKIP_HEAVY_BROWSER_TESTS=1 npm test   # Skip click/type (OOM in low-memory CI)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `STEER_PORT` | `3000` | Server port |
+| `STEER_PORT` | `3010` | Server port |
 | `STEER_HOST` | `0.0.0.0` | Server host |
 | `STEER_MAX_SESSIONS` | `10` | Max concurrent sessions |
 | `STEER_SESSION_TIMEOUT_MS` | `300000` | Session idle timeout (5 min) |
@@ -176,7 +176,7 @@ SKIP_HEAVY_BROWSER_TESTS=1 npm test   # Skip click/type (OOM in low-memory CI)
 | `STEER_VIEWPORT_WIDTH` | `1280` | Viewport width |
 | `STEER_VIEWPORT_HEIGHT` | `720` | Viewport height |
 | `STEER_EXECUTABLE_PATH` | (auto) | Custom browser path |
-| `STEER_MCP_PORT` | `3001` | MCP HTTP server port |
+| `STEER_MCP_PORT` | `3011` | MCP HTTP server port |
 | `STEER_LOG_LEVEL` | `info` | Log level |
 
 ## HTTP Routes Summary

@@ -33,7 +33,7 @@ function envBrowser(key: string, fallback: BrowserType): BrowserType {
 }
 
 export const config = {
-  port: envInt('STEER_PORT', 3000),
+  port: envInt('STEER_PORT', 3010),
   host: env('STEER_HOST', '0.0.0.0'),
   maxSessions: envInt('STEER_MAX_SESSIONS', 10),
   sessionTimeoutMs: envInt('STEER_SESSION_TIMEOUT_MS', 300_000),

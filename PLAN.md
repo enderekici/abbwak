@@ -332,7 +332,7 @@ interface ActionResult {
 
 ## 6. API Design
 
-### Base URL: `http://localhost:3000` (configurable)
+### Base URL: `http://localhost:3010` (configurable)
 
 ### Endpoints
 

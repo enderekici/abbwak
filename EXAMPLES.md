@@ -2,7 +2,7 @@
 
 Practical examples for using steer via the REST API and MCP tools.
 
-All REST API examples use `curl` against `http://localhost:3000`. Start the server first:
+All REST API examples use `curl` against `http://localhost:3010`. Start the server first:
 
 ```bash
 npm run dev          # development
@@ -39,7 +39,7 @@ docker compose up    # Docker
 ### Health Check
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:3010/health
 ```
 
 Response:
@@ -63,7 +63,7 @@ Response:
 #### Create a session
 
 ```bash
-curl -X POST http://localhost:3000/sessions \
+curl -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' \
   -d '{}'
 ```
@@ -81,7 +81,7 @@ Response:
 #### Create a session with custom viewport
 
 ```bash
-curl -X POST http://localhost:3000/sessions \
+curl -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' \
   -d '{
     "viewport": { "width": 1920, "height": 1080 },
@@ -92,7 +92,7 @@ curl -X POST http://localhost:3000/sessions \
 #### List all sessions
 
 ```bash
-curl http://localhost:3000/sessions
+curl http://localhost:3010/sessions
 ```
 
 Response:
@@ -113,7 +113,7 @@ Response:
 #### Delete a session
 
 ```bash
-curl -X DELETE http://localhost:3000/sessions/V1StGXR8_Z5jdHi
+curl -X DELETE http://localhost:3010/sessions/V1StGXR8_Z5jdHi
 ```
 
 Response:
@@ -131,7 +131,7 @@ Response:
 ```bash
 ID="V1StGXR8_Z5jdHi"
 
-curl -X POST http://localhost:3000/sessions/$ID/navigate \
+curl -X POST http://localhost:3010/sessions/$ID/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://example.com" }'
 ```
@@ -156,7 +156,7 @@ Response includes a snapshot of all interactive elements:
 #### Navigate with a wait condition
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/navigate \
+curl -X POST http://localhost:3010/sessions/$ID/navigate \
   -H 'Content-Type: application/json' \
   -d '{
     "url": "https://example.com",
@@ -171,7 +171,7 @@ curl -X POST http://localhost:3000/sessions/$ID/navigate \
 #### Get the current page snapshot
 
 ```bash
-curl http://localhost:3000/sessions/$ID/observe
+curl http://localhost:3010/sessions/$ID/observe
 ```
 
 Response:
@@ -190,7 +190,7 @@ Response:
 #### Minimal verbosity (fewer tokens)
 
 ```bash
-curl "http://localhost:3000/sessions/$ID/observe?verbosity=minimal"
+curl "http://localhost:3010/sessions/$ID/observe?verbosity=minimal"
 ```
 
 Returns only `ref`, `role`, and `name` for each element.
@@ -198,7 +198,7 @@ Returns only `ref`, `role`, and `name` for each element.
 #### Detailed verbosity
 
 ```bash
-curl "http://localhost:3000/sessions/$ID/observe?verbosity=detailed"
+curl "http://localhost:3010/sessions/$ID/observe?verbosity=detailed"
 ```
 
 Returns all fields including descriptions.
@@ -208,19 +208,19 @@ Returns all fields including descriptions.
 Restrict the snapshot to a specific part of the page:
 
 ```bash
-curl "http://localhost:3000/sessions/$ID/observe?scope=form.login"
+curl "http://localhost:3010/sessions/$ID/observe?scope=form.login"
 ```
 
 #### Limit number of results
 
 ```bash
-curl "http://localhost:3000/sessions/$ID/observe?maxRefs=5"
+curl "http://localhost:3010/sessions/$ID/observe?maxRefs=5"
 ```
 
 #### Combine options
 
 ```bash
-curl "http://localhost:3000/sessions/$ID/observe?verbosity=minimal&scope=%23main&maxRefs=10"
+curl "http://localhost:3010/sessions/$ID/observe?verbosity=minimal&scope=%23main&maxRefs=10"
 ```
 
 ---
@@ -232,7 +232,7 @@ curl "http://localhost:3000/sessions/$ID/observe?verbosity=minimal&scope=%23main
 Using a ref ID from a previous snapshot:
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "click", "ref": "r2" }'
 ```
@@ -240,7 +240,7 @@ curl -X POST http://localhost:3000/sessions/$ID/act \
 Using a CSS selector:
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "click", "selector": "button.submit" }'
 ```
@@ -248,7 +248,7 @@ curl -X POST http://localhost:3000/sessions/$ID/act \
 #### Type text into an input
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "type", "ref": "r3", "value": "hello world" }'
 ```
@@ -256,7 +256,7 @@ curl -X POST http://localhost:3000/sessions/$ID/act \
 #### Select a dropdown option
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "select", "ref": "r7", "value": "option2" }'
 ```
@@ -265,17 +265,17 @@ curl -X POST http://localhost:3000/sessions/$ID/act \
 
 ```bash
 # Scroll down
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "scroll", "direction": "down" }'
 
 # Scroll up
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "scroll", "direction": "up" }'
 
 # Scroll an element into view
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "scroll", "ref": "r15" }'
 ```
@@ -284,17 +284,17 @@ curl -X POST http://localhost:3000/sessions/$ID/act \
 
 ```bash
 # Wait for an element to become visible
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "wait", "selector": "#results", "state": "visible", "timeout": 10000 }'
 
 # Wait for an element to be removed
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "wait", "selector": ".loading-spinner", "state": "detached" }'
 
 # Wait for network idle (no selector)
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "wait", "timeout": 5000 }'
 ```
@@ -303,22 +303,22 @@ curl -X POST http://localhost:3000/sessions/$ID/act \
 
 ```bash
 # Press Enter
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "keyboard", "key": "Enter" }'
 
 # Press Escape
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "keyboard", "key": "Escape" }'
 
 # Select all text (Ctrl+A)
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "keyboard", "key": "Control+a" }'
 
 # Copy (Ctrl+C)
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "keyboard", "key": "Control+c" }'
 ```
@@ -326,7 +326,7 @@ curl -X POST http://localhost:3000/sessions/$ID/act \
 #### Hover over an element
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "hover", "ref": "r4" }'
 ```
@@ -334,7 +334,7 @@ curl -X POST http://localhost:3000/sessions/$ID/act \
 #### Upload a file
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "upload", "ref": "r8", "filePaths": ["/path/to/document.pdf"] }'
 ```
@@ -343,17 +343,17 @@ curl -X POST http://localhost:3000/sessions/$ID/act \
 
 ```bash
 # Accept the next dialog (alert/confirm/prompt)
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "dialog", "dialogAction": "accept" }'
 
 # Dismiss the next dialog
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "dialog", "dialogAction": "dismiss" }'
 
 # Accept a prompt dialog with text
-curl -X POST http://localhost:3000/sessions/$ID/act \
+curl -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "dialog", "dialogAction": "accept", "promptText": "my answer" }'
 ```
@@ -385,7 +385,7 @@ All actions return the same response shape:
 Uses Mozilla Readability to extract the main content:
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "text" }'
 ```
@@ -395,7 +395,7 @@ curl -X POST http://localhost:3000/sessions/$ID/extract \
 Preserves headings, links, lists, and other formatting:
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "markdown" }'
 ```
@@ -403,7 +403,7 @@ curl -X POST http://localhost:3000/sessions/$ID/extract \
 #### Extract from a specific section
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "markdown", "selector": "article.main-content" }'
 ```
@@ -413,7 +413,7 @@ curl -X POST http://localhost:3000/sessions/$ID/extract \
 Extract an array of items matching a JSON schema:
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{
     "mode": "structured",
@@ -448,7 +448,7 @@ Response:
 #### Extract a single object
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{
     "mode": "structured",
@@ -467,7 +467,7 @@ curl -X POST http://localhost:3000/sessions/$ID/extract \
 #### Limit content length
 
 ```bash
-curl -X POST http://localhost:3000/sessions/$ID/extract \
+curl -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "text", "maxLength": 1000 }'
 ```
@@ -479,19 +479,19 @@ curl -X POST http://localhost:3000/sessions/$ID/extract \
 #### Viewport screenshot
 
 ```bash
-curl http://localhost:3000/sessions/$ID/screenshot > page.jpg
+curl http://localhost:3010/sessions/$ID/screenshot > page.jpg
 ```
 
 #### Full page screenshot
 
 ```bash
-curl "http://localhost:3000/sessions/$ID/screenshot?fullPage=true" > full-page.jpg
+curl "http://localhost:3010/sessions/$ID/screenshot?fullPage=true" > full-page.jpg
 ```
 
 #### High quality screenshot
 
 ```bash
-curl "http://localhost:3000/sessions/$ID/screenshot?quality=90" > high-quality.jpg
+curl "http://localhost:3010/sessions/$ID/screenshot?quality=90" > high-quality.jpg
 ```
 
 The REST API returns JPEG images. Quality defaults to 50.
@@ -636,32 +636,32 @@ All tools accept an optional `sessionId`. If omitted, a default session is creat
 
 ```bash
 # 1. Create a session
-ID=$(curl -s -X POST http://localhost:3000/sessions \
+ID=$(curl -s -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' \
   -d '{}' | jq -r '.id')
 
 # 2. Navigate to the login page
-curl -s -X POST http://localhost:3000/sessions/$ID/navigate \
+curl -s -X POST http://localhost:3010/sessions/$ID/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://example.com/login" }' | jq '.snapshot.refs[] | {ref, role, name}'
 
 # 3. Type the username (using ref from snapshot)
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "type", "ref": "r3", "value": "myusername" }'
 
 # 4. Type the password
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "type", "ref": "r4", "value": "mypassword" }'
 
 # 5. Click the login button
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "click", "ref": "r5" }'
 
 # 6. Wait for the dashboard to load
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "wait", "selector": ".dashboard", "state": "visible" }'
 ```
@@ -670,15 +670,15 @@ curl -s -X POST http://localhost:3000/sessions/$ID/act \
 
 ```bash
 # 1. Create session and navigate
-ID=$(curl -s -X POST http://localhost:3000/sessions \
+ID=$(curl -s -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' -d '{}' | jq -r '.id')
 
-curl -s -X POST http://localhost:3000/sessions/$ID/navigate \
+curl -s -X POST http://localhost:3010/sessions/$ID/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://example.com/products" }' > /dev/null
 
 # 2. Extract structured product data
-curl -s -X POST http://localhost:3000/sessions/$ID/extract \
+curl -s -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{
     "mode": "structured",
@@ -698,59 +698,59 @@ curl -s -X POST http://localhost:3000/sessions/$ID/extract \
   }' | jq '.content'
 
 # 3. Clean up
-curl -s -X DELETE http://localhost:3000/sessions/$ID
+curl -s -X DELETE http://localhost:3010/sessions/$ID
 ```
 
 ### Fill Out a Multi-Step Form
 
 ```bash
-ID=$(curl -s -X POST http://localhost:3000/sessions \
+ID=$(curl -s -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' -d '{}' | jq -r '.id')
 
 # Navigate to the form
-curl -s -X POST http://localhost:3000/sessions/$ID/navigate \
+curl -s -X POST http://localhost:3010/sessions/$ID/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://example.com/apply" }' > /dev/null
 
 # Observe the form to get ref IDs
-curl -s http://localhost:3000/sessions/$ID/observe | jq '.refs'
+curl -s http://localhost:3010/sessions/$ID/observe | jq '.refs'
 
 # Fill in text fields
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "type", "ref": "r2", "value": "Jane Doe" }'
 
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "type", "ref": "r3", "value": "jane@example.com" }'
 
 # Select a dropdown
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "select", "ref": "r4", "value": "engineering" }'
 
 # Check a checkbox
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "click", "ref": "r5" }'
 
 # Upload a resume
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "upload", "ref": "r6", "filePaths": ["/path/to/resume.pdf"] }'
 
 # Submit the form
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "click", "ref": "r7" }'
 
 # Wait for confirmation
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "wait", "selector": ".confirmation", "state": "visible" }'
 
 # Extract confirmation message
-curl -s -X POST http://localhost:3000/sessions/$ID/extract \
+curl -s -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "text", "selector": ".confirmation" }'
 ```
@@ -758,34 +758,34 @@ curl -s -X POST http://localhost:3000/sessions/$ID/extract \
 ### Search and Extract Results
 
 ```bash
-ID=$(curl -s -X POST http://localhost:3000/sessions \
+ID=$(curl -s -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' -d '{}' | jq -r '.id')
 
 # Navigate to a search engine
-curl -s -X POST http://localhost:3000/sessions/$ID/navigate \
+curl -s -X POST http://localhost:3010/sessions/$ID/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://www.google.com" }' > /dev/null
 
 # Observe to find the search box
-curl -s http://localhost:3000/sessions/$ID/observe?verbosity=minimal | jq '.refs'
+curl -s http://localhost:3010/sessions/$ID/observe?verbosity=minimal | jq '.refs'
 
 # Type the search query
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "type", "ref": "r3", "value": "steer headless browser for AI agents" }'
 
 # Press Enter to search
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "keyboard", "key": "Enter" }'
 
 # Wait for results
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "wait", "selector": "#search", "state": "visible" }'
 
 # Extract results as markdown
-curl -s -X POST http://localhost:3000/sessions/$ID/extract \
+curl -s -X POST http://localhost:3010/sessions/$ID/extract \
   -H 'Content-Type: application/json' \
   -d '{ "mode": "markdown", "maxLength": 2000 }'
 ```
@@ -793,22 +793,22 @@ curl -s -X POST http://localhost:3000/sessions/$ID/extract \
 ### Take a Screenshot of a Page
 
 ```bash
-ID=$(curl -s -X POST http://localhost:3000/sessions \
+ID=$(curl -s -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' -d '{}' | jq -r '.id')
 
 # Navigate
-curl -s -X POST http://localhost:3000/sessions/$ID/navigate \
+curl -s -X POST http://localhost:3010/sessions/$ID/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://example.com" }' > /dev/null
 
 # Viewport screenshot
-curl -s http://localhost:3000/sessions/$ID/screenshot > viewport.jpg
+curl -s http://localhost:3010/sessions/$ID/screenshot > viewport.jpg
 
 # Full page screenshot at high quality
-curl -s "http://localhost:3000/sessions/$ID/screenshot?fullPage=true&quality=90" > fullpage.jpg
+curl -s "http://localhost:3010/sessions/$ID/screenshot?fullPage=true&quality=90" > fullpage.jpg
 
 # Clean up
-curl -s -X DELETE http://localhost:3000/sessions/$ID
+curl -s -X DELETE http://localhost:3010/sessions/$ID
 ```
 
 ---
@@ -820,12 +820,12 @@ curl -s -X DELETE http://localhost:3000/sessions/$ID
 For simple scripts that interact with one page at a time, create a session at the start and delete it when done:
 
 ```bash
-ID=$(curl -s -X POST http://localhost:3000/sessions \
+ID=$(curl -s -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' -d '{}' | jq -r '.id')
 
 # ... do work ...
 
-curl -s -X DELETE http://localhost:3000/sessions/$ID
+curl -s -X DELETE http://localhost:3010/sessions/$ID
 ```
 
 ### Multiple concurrent sessions
@@ -833,18 +833,18 @@ curl -s -X DELETE http://localhost:3000/sessions/$ID
 For parallel scraping or multi-site workflows, create separate sessions:
 
 ```bash
-ID1=$(curl -s -X POST http://localhost:3000/sessions \
+ID1=$(curl -s -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' -d '{}' | jq -r '.id')
 
-ID2=$(curl -s -X POST http://localhost:3000/sessions \
+ID2=$(curl -s -X POST http://localhost:3010/sessions \
   -H 'Content-Type: application/json' -d '{}' | jq -r '.id')
 
 # Navigate each session to different sites
-curl -s -X POST http://localhost:3000/sessions/$ID1/navigate \
+curl -s -X POST http://localhost:3010/sessions/$ID1/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://site-a.com" }' &
 
-curl -s -X POST http://localhost:3000/sessions/$ID2/navigate \
+curl -s -X POST http://localhost:3010/sessions/$ID2/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://site-b.com" }' &
 
@@ -866,7 +866,7 @@ When using MCP tools, if you omit `sessionId`, a default session is created auto
 ### Session not found
 
 ```bash
-curl -s -X POST http://localhost:3000/sessions/invalid-id/navigate \
+curl -s -X POST http://localhost:3010/sessions/invalid-id/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "https://example.com" }'
 ```
@@ -886,7 +886,7 @@ Response (404):
 ### Invalid ref ID
 
 ```bash
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "click", "ref": "r999" }'
 ```
@@ -906,7 +906,7 @@ Response (400):
 ### Blocked URL protocol
 
 ```bash
-curl -s -X POST http://localhost:3000/sessions/$ID/navigate \
+curl -s -X POST http://localhost:3010/sessions/$ID/navigate \
   -H 'Content-Type: application/json' \
   -d '{ "url": "javascript:alert(1)" }'
 ```
@@ -954,7 +954,7 @@ When `STEER_MAX_SESSIONS` sessions are already active:
 ### Missing required parameters
 
 ```bash
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "type", "ref": "r1" }'
 ```
@@ -974,7 +974,7 @@ Response (400):
 ### Invalid action name
 
 ```bash
-curl -s -X POST http://localhost:3000/sessions/$ID/act \
+curl -s -X POST http://localhost:3010/sessions/$ID/act \
   -H 'Content-Type: application/json' \
   -d '{ "action": "fly" }'
 ```

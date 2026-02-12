@@ -20,15 +20,15 @@ if (args.includes('--help') || args.includes('-h')) {
 steer — API-Based Browser Without API Key
 
 Usage:
-  steer              Start the REST API server (default: http://0.0.0.0:3000)
+  steer              Start the REST API server (default: http://0.0.0.0:3010)
   steer --mcp        Start the MCP server (stdio transport, for Claude Desktop)
   steer --mcp-http   Start the MCP server (HTTP transport, for Docker / remote)
   steer --help       Show this help message
 
 Environment variables:
-  STEER_PORT               Server port (default: 3000)
+  STEER_PORT               Server port (default: 3010)
   STEER_HOST               Server host (default: 0.0.0.0)
-  STEER_MCP_PORT           MCP HTTP server port (default: 3001)
+  STEER_MCP_PORT           MCP HTTP server port (default: 3011)
   STEER_MAX_SESSIONS       Max concurrent sessions (default: 10)
   STEER_SESSION_TIMEOUT_MS Session idle timeout in ms (default: 300000)
   STEER_REQUEST_TIMEOUT_MS Request timeout in ms (default: 30000)
@@ -53,7 +53,7 @@ MCP setup (Claude Desktop — Docker HTTP):
   {
     "mcpServers": {
       "steer": {
-        "url": "http://localhost:3001/mcp"
+        "url": "http://localhost:3011/mcp"
       }
     }
   }
@@ -65,7 +65,7 @@ MCP setup (Claude Desktop — Docker HTTP):
 if (args.includes('--mcp-http')) {
   // MCP HTTP mode: Streamable HTTP transport (for Docker / remote)
   const { startMcpHttpServer } = await import('./mcp/server.js');
-  const port = Number.parseInt(process.env.STEER_MCP_PORT || '3001', 10);
+  const port = Number.parseInt(process.env.STEER_MCP_PORT || '3011', 10);
   const host = process.env.STEER_HOST || '0.0.0.0';
   await startMcpHttpServer(port, host);
 } else if (args.includes('--mcp')) {
