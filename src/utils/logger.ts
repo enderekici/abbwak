@@ -1,9 +1,12 @@
 import pino from 'pino';
 
 const level = process.env.STEER_LOG_LEVEL ?? 'info';
-const isDev = process.env.NODE_ENV !== 'production';
+const isMcpStdio = process.argv.includes('--mcp');
+const isDev = process.env.NODE_ENV !== 'production' && !isMcpStdio;
 
-// Write logs to stderr so they don't interfere with MCP stdio transport on stdout
+// In MCP stdio mode, always write JSON to stderr (pino-pretty's worker thread
+// ignores destination:2 and leaks logs to stdout, corrupting the JSON-RPC transport).
+// In dev mode (REST API), use pino-pretty for human-readable output.
 export const logger = pino(
   {
     level,
