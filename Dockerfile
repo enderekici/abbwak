@@ -24,9 +24,7 @@ WORKDIR /app
 RUN groupadd -g 10001 steer && \
     useradd -u 10001 -g steer -s /bin/bash steer
 
-# Install only Firefox browser (saves ~400MB vs all browsers)
-RUN npx playwright install --with-deps firefox
-
+# Base image already includes all browsers at /ms-playwright/
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
 

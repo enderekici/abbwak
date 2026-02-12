@@ -5,6 +5,7 @@
 ![Node.js](https://img.shields.io/badge/node-%3E%3D24-green?logo=node.js)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9-blue?logo=typescript)
 ![Playwright](https://img.shields.io/badge/playwright-1.58-green?logo=playwright)
+![MCP](https://img.shields.io/badge/MCP-compatible-purple?logo=anthropic)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **API-Based Browser Without API Key** — A free, open-source headless browser designed for AI agents.
