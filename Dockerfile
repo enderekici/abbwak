@@ -41,7 +41,7 @@ USER steer
 ENV NODE_ENV=production
 ENV STEER_HEADLESS=true
 ENV STEER_HOST=0.0.0.0
-ENV STEER_PORT=3000
+ENV STEER_PORT=3010
 ENV STEER_BROWSER=firefox
 
 # Firefox-specific environment variables for Docker
@@ -49,11 +49,12 @@ ENV HOME=/home/steer
 ENV XDG_CACHE_HOME=/tmp/firefox-cache
 ENV DCONF_PROFILE=
 ENV MOZ_DISABLE_CONTENT_SANDBOX=1
+ENV MOZ_DISABLE_GMP_SANDBOX=1
 
-EXPOSE 3000
+EXPOSE 3010
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD node -e "fetch('http://localhost:3000/health').then(r=>{if(!r.ok)throw 1})"
+  CMD node -e "fetch('http://localhost:3010/health').then(r=>{if(!r.ok)throw 1})"
 
 # Default: REST API server. Override with: docker run steer node dist/cli.js --mcp
 CMD ["node", "dist/cli.js"]

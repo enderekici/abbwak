@@ -17,7 +17,7 @@ services:
       - steer-profiles:/app/profiles
     restart: unless-stopped
     security_opt:
-      - no-new-privileges:true
+      - seccomp=unconfined
     read_only: true
     tmpfs:
       - /tmp:nosuid,size=256m
@@ -53,7 +53,7 @@ services:
       - STEER_BLOCK_RESOURCES=image,font,media
     restart: unless-stopped
     security_opt:
-      - no-new-privileges:true
+      - seccomp=unconfined
     read_only: true
     tmpfs:
       - /tmp:nosuid,size=256m
