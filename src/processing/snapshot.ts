@@ -121,9 +121,7 @@ export async function takeSnapshot(
   // inside page.evaluate() callbacks.  The helper lives in the Node module
   // scope but doesn't exist in the serialised browser context.  Inject a
   // no-op shim as a string literal so esbuild can't transform it.
-  await page.evaluate(
-    'if(typeof __name==="undefined"){var __name=function(t){return t}}',
-  );
+  await page.evaluate('if(typeof __name==="undefined"){var __name=function(t){return t}}');
 
   const rawElements: RawElement[] = await page.evaluate(
     ({

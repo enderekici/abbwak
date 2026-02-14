@@ -134,9 +134,7 @@ describe('takeSnapshot', () => {
       url: vi.fn().mockReturnValue('http://test.com'),
       title: vi.fn().mockResolvedValue('Test Page'),
       // First evaluate call is the __name shim (string), second is the snapshot
-      evaluate: vi.fn()
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(rawElements),
+      evaluate: vi.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce(rawElements),
       $: vi.fn().mockResolvedValue({ mock: true }),
     } as any;
   }
