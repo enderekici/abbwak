@@ -117,6 +117,14 @@ export async function takeSnapshot(
 
   // ── 1. Collect element data inside the browser ────────────────────────
 
+  // tsx (esbuild keepNames) injects __name() calls for named const functions
+  // inside page.evaluate() callbacks.  The helper lives in the Node module
+  // scope but doesn't exist in the serialised browser context.  Inject a
+  // no-op shim as a string literal so esbuild can't transform it.
+  await page.evaluate(
+    'if(typeof __name==="undefined"){var __name=function(t){return t}}',
+  );
+
   const rawElements: RawElement[] = await page.evaluate(
     ({
       interactiveSel,
