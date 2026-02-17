@@ -68,7 +68,9 @@ export class BrowserEngine {
       headless,
       executablePath,
       args: firefoxArgs,
-      env: firefoxEnv,
+      ...(Object.keys(firefoxEnv).length > 0 && {
+        env: { ...process.env, ...firefoxEnv },
+      }),
     });
 
     this.browser.on('disconnected', () => {

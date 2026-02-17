@@ -22,7 +22,6 @@ services:
     restart: unless-stopped
     security_opt:
       - seccomp=unconfined
-    read_only: true
     tmpfs:
       - /tmp:nosuid,size=256m
     logging:
@@ -62,7 +61,6 @@ services:
     restart: unless-stopped
     security_opt:
       - seccomp=unconfined
-    read_only: true
     tmpfs:
       - /tmp:nosuid,size=256m
     logging:
